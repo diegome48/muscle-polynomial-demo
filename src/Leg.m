@@ -19,6 +19,8 @@ classdef Leg
         kneeFlexion       % Knee flexion angle in radians
         ankleFlexion      % Ankle (plantar) flexion angle in radians
         % TODO setup bounds for the inner representation
+        % TODO define joint locations / geometry
+        % TODO define origin and insertion points for the muscle
     end
     
     methods
@@ -32,6 +34,10 @@ classdef Leg
         end
 
         function q = getFullCartesianRepresentation(obj)
+            % TODO implement
+        end
+
+        function l = getMuscleLength(obj)
             % TODO implement
         end
 
