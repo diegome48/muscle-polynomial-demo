@@ -1,23 +1,30 @@
 classdef Polynomial
-    %POLYNOMIAL Summary of this class goes here
-    %   Detailed explanation goes here
-    
+    %POLYNOMIAL Build and fit generalized, multivariate polynomials
     properties
-        Property1
+        Nq      % Number of independent variables in the polynomial
+        a       % Coefficients of the polynomial
+        A       % Set of coefficient combinations
     end
     
     methods
-        function obj = Polynomial(inputArg1,inputArg2)
-            %POLYNOMIAL Construct an instance of this class
-            %   Detailed explanation goes here
-            obj.Property1 = inputArg1 + inputArg2;
+        function obj = Polynomial(Nq)
+            obj.Nq = Nq;
+            % TODO build A and initialize a to empty/zero vector
         end
         
-        function outputArg = method1(obj,inputArg)
-            %METHOD1 Summary of this method goes here
-            %   Detailed explanation goes here
-            outputArg = obj.Property1 + inputArg;
+        % Fits the polynomial to fit the variable measures Q and the
+        % corresponding muscle lengths l
+        % Q is a matrix where every row is a pose representation q
+        % l is a column vector with the muscle lenghts corresponding to the
+        % states in Q.
+        function fit(obj, Q, l)
+            % TODO implement
+        end
+        
+        % Computes the polynomial terms (without coefficients) from a pose
+        % representation q.
+        function t = computePolynomialTerms(obj, q)
+            % TODO implement
         end
     end
 end
-
