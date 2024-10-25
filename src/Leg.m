@@ -14,11 +14,16 @@ classdef Leg
     
     properties
         % Inner state representation (minimal set of coordinates)
-        thighPosition     % 3 translational coordinates xyz
-        thighOrientation  % 3 euler angles, radians, xyz formulation
-        kneeFlexion       % Knee flexion angle in radians
-        ankleFlexion      % Ankle (plantar) flexion angle in radians
-        % TODO setup bounds for the inner representation
+        % A 8-vector containing, in this order,
+        %   - 3-vector of translational coordinates of the thigh
+        %   - 3-vector of euler angles of the thigh in xyz formulation
+        %   - scalar with knee flexion angle in radians
+        %   - scalar with ankle dorsi-flexion angle in radians
+        innerState
+        % Lower / Upper bounds for innerState
+        % 8-vector in the same order as innerState.
+        lb = [-1, -1, -1, 0, 0, 0, 0, 0];
+        ub = [1, 1, 1, 2*pi, 2*pi, 2*pi, 3*pi/4, 3*pi/4];
         % TODO define joint locations / geometry
         % TODO define origin and insertion points for the muscle
     end
@@ -31,6 +36,8 @@ classdef Leg
         function sample(obj)
             %SAMPLE sets the state of the LEG to a random feasible point
             % TODO implement
+            % NOTE if the beta angle is approx +-pi/2 then re-roll beta to
+            % avoid gimbal lock
         end
 
         function q = getFullCartesianRepresentation(obj)
