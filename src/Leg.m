@@ -33,11 +33,14 @@ classdef Leg
             obj.sample();
         end
         
-        function sample(obj)
+        function obj = sample(obj)
             %SAMPLE sets the state of the LEG to a random feasible point
-            % TODO implement
-            % NOTE if the beta angle is approx +-pi/2 then re-roll beta to
-            % avoid gimbal lock
+            s = (obj.ub - obj.lb) .* rand(length(obj.lb), 1) - obj.lb;
+            % Avoiding gimbal lock
+            while isItGimballing(s)
+                s = (obj.ub - obj.lb) .* rand(length(obj.lb), 1) - obj.lb;
+            end
+            obj.innerState = s;
         end
 
         function q = getFullCartesianRepresentation(obj)
@@ -58,3 +61,8 @@ classdef Leg
     end
 end
 
+function locked = isItGimballing(sample)
+    EPSILON = pi / 36;
+    beta = sample(5);
+    locked = abs(abs(beta) - pi) < EPSILON;
+end
