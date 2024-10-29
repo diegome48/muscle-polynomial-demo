@@ -3,6 +3,7 @@ classdef Polynomial
     properties
         MAX_ALLOWED_COEFFICIENTS = 1e4;
         Nq      % Number of independent variables in the polynomial
+        Na      % Number of coefficients
         a       % Coefficients of the polynomial
         A       % Set of coefficient combinations
     end
@@ -10,13 +11,13 @@ classdef Polynomial
     methods
         function obj = Polynomial(Nq, P)
             obj.Nq = Nq;
-            cardinality = getCompleteACardinality(Nq, P);
-            if cardinality > obj.MAX_ALLOWED_COEFFICIENTS
+            obj.Na = getCompleteACardinality(Nq, P);
+            if obj.Na > obj.MAX_ALLOWED_COEFFICIENTS
                 msg = "The cardinality of A, %d, exceeds the maximum allowed size";
-                error(msg, cardinality);
+                error(msg, obj.Na);
             end
-            obj.a = zeros(cardinality, 1);
-            obj.A = zeros(cardinality, Nq);
+            obj.a = zeros(obj.Na, 1);
+            obj.A = zeros(obj.Na, Nq);
             row = 1;
             for p = 0:P
                 blockSize = computeA(Nq, p, true);
@@ -42,14 +43,18 @@ classdef Polynomial
         % Computes the polynomial terms (without coefficients) from a pose
         % representation q.
         function t = computePolynomialTerms(obj, q)
-            
+            t = zeros(1, obj.Na);
+            for i = 1:obj.Na
+                alpha = obj.A(i, :);
+                t(i) = computePolynomialTerm(q, alpha);
+            end
         end
     end
 end
 
 % Computes a polynomial term from a vector of coordinates q and a
 % coefficient vector alpha
-function polyterm = computePolynomialTerm(q, alpha);
+function polyterm = computePolynomialTerm(q, alpha)
     polyterm = 1;
     for i = 1:length(q)
         power = alpha(i);
