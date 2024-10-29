@@ -1,4 +1,4 @@
-classdef Polynomial < handle
+classdef Polynomial
     %POLYNOMIAL Build and fit generalized, multivariate polynomials
     properties
         MAX_ALLOWED_COEFFICIENTS = 1e4;
@@ -31,9 +31,9 @@ classdef Polynomial < handle
         % Q is a matrix where every row is a pose representation q
         % l is a column vector with the muscle lenghts corresponding to the
         % states in Q.
-        function fit(obj, Q, l)
+        function obj = fit(obj, Q, l)
             Nm = size(Q, 1);
-            T = zeros(Nm, obj.Nq);
+            T = zeros(Nm, obj.Na);
             for row = 1:Nm
                 T(row, :) = obj.computePolynomialTerms(Q(row, :));
             end
@@ -48,6 +48,11 @@ classdef Polynomial < handle
                 alpha = obj.A(i, :);
                 t(i) = evaluateTerm(q, alpha);
             end
+        end
+
+        % Evaluate a set of coordinates q
+        function l = evaluate(obj, q)
+            l = obj.computePolynomialTerms(q) * obj.a;
         end
     end
 end
