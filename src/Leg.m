@@ -1,4 +1,4 @@
-classdef Leg
+classdef Leg < handle
     %LEG Geometrical representation of a leg consisting of three segments
     % The three segments (thigh, shank and foot) are connected by two
     % revolute joints (knee, ankle) for simplicity.
@@ -32,8 +32,8 @@ classdef Leg
 
         % Lower / Upper bounds for innerState
         % 8-vector in the same order as innerState.
-        lb = [-1, -1, -1, 0, 0, 0, 0, 0];
-        ub = [1, 1, 1, 2*pi, 2*pi, 2*pi, 3*pi/4, 3*pi/4];
+        lb = [-1; -1; -1; 0; 0; 0; 0; 0];
+        ub = [1; 1; 1; 2*pi; 2*pi; 2*pi; 3*pi/4; 3*pi/4];
 
         % Local coordinates joint locations / geometry
         thighKnee = [0 -0.25 0];
@@ -53,7 +53,7 @@ classdef Leg
             obj.sample();
         end
         
-        function obj = sample(obj)
+        function sample(obj)
             %SAMPLE sets the state of the LEG to a random feasible point
             s = (obj.ub - obj.lb) .* rand(length(obj.lb), 1) - obj.lb;
             % Avoiding gimbal lock
@@ -145,7 +145,7 @@ classdef Leg
             end
         end
 
-        function obj = setKneeFlexion(obj, kneeFlexionAngle)
+        function setKneeFlexion(obj, kneeFlexionAngle)
             obj.innerState(7) = kneeFlexionAngle;
         end
     end

@@ -1,4 +1,4 @@
-classdef Polynomial
+classdef Polynomial < handle
     %POLYNOMIAL Build and fit generalized, multivariate polynomials
     properties
         MAX_ALLOWED_COEFFICIENTS = 1e4;
@@ -31,7 +31,7 @@ classdef Polynomial
         % Q is a matrix where every row is a pose representation q
         % l is a column vector with the muscle lenghts corresponding to the
         % states in Q.
-        function obj = fit(obj, Q, l)
+        function fit(obj, Q, l)
             Nm = size(Q, 1);
             T = zeros(Nm, obj.Nq);
             for row = 1:Nm
@@ -46,7 +46,7 @@ classdef Polynomial
             t = zeros(1, obj.Na);
             for i = 1:obj.Na
                 alpha = obj.A(i, :);
-                t(i) = computePolynomialTerm(q, alpha);
+                t(i) = evaluateTerm(q, alpha);
             end
         end
     end
@@ -54,7 +54,7 @@ end
 
 % Computes a polynomial term from a vector of coordinates q and a
 % coefficient vector alpha
-function polyterm = computePolynomialTerm(q, alpha)
+function polyterm = evaluateTerm(q, alpha)
     polyterm = 1;
     for i = 1:length(q)
         power = alpha(i);
