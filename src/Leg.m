@@ -25,12 +25,19 @@ classdef Leg
         %   x <---> anterior (+) posterior (-)
         %   y <---> proximal/up (+) distal/down (-)
         %   z <---> lateral (+) medial (-)
+        % Hence knee flexion happens in the thigh's z axis, and ankle
+        % flexion happens in the shank's z axis (note that all z axes are
+        % parallel given that all rotations are in the z axis).
         innerState
         % Lower / Upper bounds for innerState
         % 8-vector in the same order as innerState.
         lb = [-1, -1, -1, 0, 0, 0, 0, 0];
         ub = [1, 1, 1, 2*pi, 2*pi, 2*pi, 3*pi/4, 3*pi/4];
-        % Local coordinates oint locations / geometry
+        % Local coordinates joint locations / geometry
+        thighKnee = [0 -0.25 0];
+        shankKnee = [0 0.20 0];
+        shankAnkle = [0 -0.20 0];
+        footAnkle = [0 0.10 0];
         % TODO define origin and insertion points for the muscle
     end
     
@@ -50,7 +57,27 @@ classdef Leg
         end
 
         function q = getFullCartesianRepresentation(obj)
-            % TODO implement
+            % Extracting innerState into readable vars
+            thighPos = obj.innerState(1:3);
+            thighAngles = obj.innerState(4:6);
+            kneeFlex = obj.innerState(7);
+            ankleFlex = obj.innerState(8);
+
+            % Computing rotation matrices for each body
+            rotMatThigh = eul2rotm(thighAngles, "XYZ");
+            rotMatShank = eul2rotm([0 0 kneeFlex], "XYZ") * rotMatThigh;
+            rotMatFoot = eul2rotm([0 0 ankleFlex], "XYZ") * rotMatShank;
+
+            % Computing the translational coordinates of the shank and foot
+            shankPos = thighPos + rotMatThigh' * obj.thighKnee ...
+                       - rotMatShank' * obj.shankKnee;
+            footPos = shankPos + rotMatShank' * obj.shankAnkle ...
+                       - rotMatFoot' * obj.footAnkle;
+            
+            % Assembling q
+            q = [thighPos; rotm2quat(rotMatThigh);
+                 shankPos; rotm2quat(rotMatShank);
+                 footPos; rotm2quat(rotMatFoot)];
         end
 
         function l = getMuscleLength(obj)
