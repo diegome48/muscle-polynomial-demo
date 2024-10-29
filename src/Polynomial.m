@@ -1,15 +1,27 @@
 classdef Polynomial
     %POLYNOMIAL Build and fit generalized, multivariate polynomials
     properties
+        MAX_ALLOWED_COEFFICIENTS = 1e4;
         Nq      % Number of independent variables in the polynomial
         a       % Coefficients of the polynomial
         A       % Set of coefficient combinations
     end
     
     methods
-        function obj = Polynomial(Nq)
+        function obj = Polynomial(Nq, P)
             obj.Nq = Nq;
-            % TODO build A and initialize a to empty/zero vector
+            cardinality = getCompleteACardinality(Nq, P);
+            if cardinality > obj.MAX_ALLOWED_COEFFICIENTS
+                msg = "The cardinality of A, %d, exceeds the maximum allowed size";
+                error(msg, cardinality);
+            end
+            obj.A = zeros(cardinality, Nq);
+            row = 1;
+            for p = 0:P
+                blockSize = getSingleACardinality(Nq, p);
+                obj.A(row:row+blockSize-1, :) = computeA(Nq, p);
+                row = row + blockSize;
+            end
         end
         
         % Fits the polynomial to fit the variable measures Q and the
@@ -28,3 +40,17 @@ classdef Polynomial
         end
     end
 end
+
+function cardinality = getSingleACardinality(N, p)
+    k = N - 1;
+    n = p + N - 1;
+    cardinality = nchoosek(n, k);
+end
+
+function cardinality = getCompleteACardinality(N, P)
+    cardinality = 0;
+    for p = 0:P
+        cardinality = cardinality + getSingleACardinality(N, p);
+    end
+end
+
