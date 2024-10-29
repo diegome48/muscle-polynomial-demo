@@ -123,7 +123,7 @@ classdef Leg
             end
         end
 
-        function q = getRelativeRotationRepresentation(obj)
+        function q = getRelativeRotationRepresentation(obj, flatten)
             absolute = obj.getAbsoluteRotationRepresentation();
             ref = absolute(:, 1);
 
@@ -132,10 +132,17 @@ classdef Leg
                 p = absolute(:, col);
                 q(:, col-1) = quaternionRelativeRotation(ref, p);
             end
+            if nargin == 2 && flatten
+                q = q(:);
+            end
         end
 
-        function q = getTranslationRepresentation(obj)
-            % TODO implement
+        function q = getTranslationRepresentation(obj, flatten)
+            fullCartesian = obj.getFullCartesianRepresentation();
+            q = fullCartesian(1:3, :);
+            if nargin == 2 && flatten
+                q = q(:);
+            end
         end
     end
 end
