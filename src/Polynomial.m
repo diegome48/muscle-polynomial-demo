@@ -42,8 +42,21 @@ classdef Polynomial
         % Computes the polynomial terms (without coefficients) from a pose
         % representation q.
         function t = computePolynomialTerms(obj, q)
-            % TODO implement
+            
         end
+    end
+end
+
+% Computes a polynomial term from a vector of coordinates q and a
+% coefficient vector alpha
+function polyterm = computePolynomialTerm(q, alpha);
+    polyterm = 1;
+    for i = 1:length(q)
+        power = alpha(i);
+        if ~power
+            continue
+        end
+        polyterm = polyterm * q(i)^power; 
     end
 end
 
