@@ -94,14 +94,14 @@ classdef Leg
             kneeFlex = obj.innerState(7);
             
             % Determining state of thigh and shank
-            rotMatThigh = eul2rotm(thighAngles, "XYZ");
-            rotMatShank = eul2rotm([0 0 kneeFlex], "XYZ") * rotMatThigh;
+            thighRotMat = eul2rotm(thighAngles, "XYZ");
+            shankRotMat = eul2rotm([0 0 kneeFlex], "XYZ") * thighRotMat;
             shankPos = thighPos + thighRotMat' * obj.thighKnee ...
                        - shankRotMat' * obj.shankKnee;
 
             % Computing positions of origin, insertion in global ref.
             originPos = thighPos + thighRotMat' * obj.origin;
-            insertionPos = shankPos + thighRotMat' * obj.insertion;
+            insertionPos = shankPos + RotMatShank' * obj.insertion;
 
             l = norm(insertionPos - originPos);
         end
