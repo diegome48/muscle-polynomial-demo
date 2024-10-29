@@ -1,14 +1,10 @@
-function A = computeA(N, P, maxSize)
+function A = computeA(N, P)
 %COMPUTEA Computes the set of all N-tuples of nonzero integers of sum L
 
     % First we solve the equivalent bars-and-stars (BS) problem
     nBS = P + N - 1;
     kBS = N - 1;
     cardinality = nchoosek(nBS, kBS);
-    if nargin == 3 && cardinality > maxSize
-        msg = "The cardinality of A, %d, exceeds the maximum allowed size";
-        error(msg, cardinality);
-    end
     barPosCombinations = nchoosek(1:nBS, kBS);
 
     % We translate the bars and stars solution to our original formulation
