@@ -64,6 +64,11 @@ classdef Leg
         end
 
         function q = getFullCartesianRepresentation(obj)
+            % Computing the full cartesian representation of the state
+            % given by obj.innerState.
+            % For convenience the function returns a matrix where each
+            % column is the representation of a single segment. To obtain a
+            % vector just flatten the output, q <-- q(:)
             % Extracting innerState into readable vars
             thighPos = obj.innerState(1:3);
             thighAngles = obj.innerState(4:6);
@@ -82,9 +87,9 @@ classdef Leg
                        - footRotMat' * obj.footAnkle;
             
             % Assembling q
-            q = [thighPos; rotm2quat(thighRotMat);
-                 shankPos; rotm2quat(shankRotMat);
-                 footPos; rotm2quat(footRotMat)];
+            q = [[thighPos; rotm2quat(thighRotMat)]...
+                 [shankPos; rotm2quat(shankRotMat)]...
+                 [footPos; rotm2quat(footRotMat)]];
         end
 
         function l = getMuscleLength(obj)
@@ -101,12 +106,16 @@ classdef Leg
 
             % Computing positions of origin, insertion in global ref.
             originPos = thighPos + thighRotMat' * obj.origin;
-            insertionPos = shankPos + RotMatShank' * obj.insertion;
+            insertionPos = shankPos + shankRotMat' * obj.insertion;
 
             l = norm(insertionPos - originPos);
         end
 
         function q = getAbsoluteRotationRepresentation(obj)
+            % TODO implement
+        end
+
+        function q = getRelativeRotationRepresentation(obj)
             % TODO implement
         end
 
