@@ -46,6 +46,10 @@ classdef Leg < handle
         origin = [0; 0.20; -0.05];
         insertion = [-0.05; 0.18; 0]
 
+        % Available representations
+        representations = ["fullCartesian", "absoluteRotation", ...
+            "relativeRotation", "translation"];
+
     end
     
     methods
@@ -142,6 +146,20 @@ classdef Leg < handle
             q = fullCartesian(1:3, :);
             if nargin == 2 && flatten
                 q = q(:);
+            end
+        end
+
+        function rep = getRepresentation(obj, representation, flatten)
+            % Gets any of the representations by its name
+            switch representation
+                case "fullCartesian"
+                    rep = obj.getFullCartesianRepresentation(flatten);
+                case "absoluteRotation"
+                    rep = obj.getAbsoluteRotationRepresentation(flatten);
+                case "relativeRotation"
+                    rep = obj.getRelativeRotationRepresentation(flatten);
+                case "translation"
+                    rep = obj.getTranslationRepresentation(flatten);
             end
         end
 
