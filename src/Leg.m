@@ -63,12 +63,12 @@ classdef Leg
             obj.innerState = s;
         end
 
-        function q = getFullCartesianRepresentation(obj)
+        function q = getFullCartesianRepresentation(obj, flatten)
             % Computing the full cartesian representation of the state
             % given by obj.innerState.
             % For convenience the function returns a matrix where each
             % column is the representation of a single segment. To obtain a
-            % vector just flatten the output, q <-- q(:)
+            % vector just flatten the output by setting flatten = true
             % Extracting innerState into readable vars
             thighPos = obj.innerState(1:3);
             thighAngles = obj.innerState(4:6);
@@ -90,6 +90,9 @@ classdef Leg
             q = [[thighPos; rotm2quat(thighRotMat)]...
                  [shankPos; rotm2quat(shankRotMat)]...
                  [footPos; rotm2quat(footRotMat)]];
+            if nargin == 2 && flatten
+                q = q(:);
+            end
         end
 
         function l = getMuscleLength(obj)
@@ -111,12 +114,24 @@ classdef Leg
             l = norm(insertionPos - originPos);
         end
 
-        function q = getAbsoluteRotationRepresentation(obj)
-            % TODO implement
+        function q = getAbsoluteRotationRepresentation(obj, flatten)
+            % This should clearly be cached, too much ATM
+            fullCartesian = obj.getFullCartesianRepresentation();
+            q = fullCartesian(4:6, :);
+            if nargin == 2 && flatten
+                q = q(:);
+            end
         end
 
         function q = getRelativeRotationRepresentation(obj)
-            % TODO implement
+            absolute = obj.getAbsoluteRotationRepresentation();
+            ref = absolute(:, 1);
+
+            q = zeros(4, size(absolute, 2)-1);
+            for col = 2:size(absolute, 2)
+                p = absolute(:, col);
+                q(:, col-1) = quaternionRelativeRotation(ref, p);
+            end
         end
 
         function q = getTranslationRepresentation(obj)
@@ -129,4 +144,20 @@ function locked = isItGimballing(sample)
     EPSILON = pi / 36;
     beta = sample(5);
     locked = abs(abs(beta) - pi) < EPSILON;
+end
+
+function pij = quaternionRelativeRotation(pi, pj)
+    % As in Nikravesh 6.122
+    ej0 = pj(1);
+    ej = pj(2:4);
+    Lj = [-ej, -skew(ej) + ej0 * eye(3)];
+    LjStar = [pj'; Lj];
+    pij = LjStar * pi;
+end
+
+function es = skew(e)
+    % Skew matrix from a 3-vector
+    es = [0, -e(3), e(2);
+          e(3), 0, -e(1);
+         -e(2), e(1), 0];
 end
