@@ -36,15 +36,15 @@ classdef Leg < handle
         ub = [1; 1; 1; 2*pi; 2*pi; 2*pi; 3*pi/4; 3*pi/4];
 
         % Local coordinates joint locations / geometry
-        thighKnee = [0 -0.25 0];
-        shankKnee = [0 0.20 0];
-        shankAnkle = [0 -0.20 0];
-        footAnkle = [0 0.10 0];
+        thighKnee = [0; -0.25; 0];
+        shankKnee = [0; 0.20; 0];
+        shankAnkle = [0; -0.20; 0];
+        footAnkle = [0; 0.10; 0];
 
         % Origin and insertion of "hamstring" in the thigh and shank
         % respectively, both in local coordinates
-        origin = [0 0.20 -0.05];
-        insertion = [-0.05 0.18 0]
+        origin = [0; 0.20; -0.05];
+        insertion = [-0.05; 0.18; 0]
 
     end
     
@@ -76,7 +76,7 @@ classdef Leg < handle
             ankleFlex = obj.innerState(8);
 
             % Computing rotation matrices for each body
-            thighRotMat = eul2rotm(thighAngles, "XYZ");
+            thighRotMat = eul2rotm(thighAngles', "XYZ");
             shankRotMat = eul2rotm([0 0 kneeFlex], "XYZ") * thighRotMat;
             footRotMat = eul2rotm([0 0 ankleFlex], "XYZ") * shankRotMat;
 
