@@ -29,16 +29,23 @@ classdef Leg
         % flexion happens in the shank's z axis (note that all z axes are
         % parallel given that all rotations are in the z axis).
         innerState
+
         % Lower / Upper bounds for innerState
         % 8-vector in the same order as innerState.
         lb = [-1, -1, -1, 0, 0, 0, 0, 0];
         ub = [1, 1, 1, 2*pi, 2*pi, 2*pi, 3*pi/4, 3*pi/4];
+
         % Local coordinates joint locations / geometry
         thighKnee = [0 -0.25 0];
         shankKnee = [0 0.20 0];
         shankAnkle = [0 -0.20 0];
         footAnkle = [0 0.10 0];
-        % TODO define origin and insertion points for the muscle
+
+        % Origin and insertion of "hamstring" in the thigh and shank
+        % respectively, both in local coordinates
+        origin = [0 0.20 -0.05];
+        insertion = [-0.05 0.18 0]
+
     end
     
     methods
@@ -64,24 +71,39 @@ classdef Leg
             ankleFlex = obj.innerState(8);
 
             % Computing rotation matrices for each body
-            rotMatThigh = eul2rotm(thighAngles, "XYZ");
-            rotMatShank = eul2rotm([0 0 kneeFlex], "XYZ") * rotMatThigh;
-            rotMatFoot = eul2rotm([0 0 ankleFlex], "XYZ") * rotMatShank;
+            thighRotMat = eul2rotm(thighAngles, "XYZ");
+            shankRotMat = eul2rotm([0 0 kneeFlex], "XYZ") * thighRotMat;
+            footRotMat = eul2rotm([0 0 ankleFlex], "XYZ") * shankRotMat;
 
             % Computing the translational coordinates of the shank and foot
-            shankPos = thighPos + rotMatThigh' * obj.thighKnee ...
-                       - rotMatShank' * obj.shankKnee;
-            footPos = shankPos + rotMatShank' * obj.shankAnkle ...
-                       - rotMatFoot' * obj.footAnkle;
+            shankPos = thighPos + thighRotMat' * obj.thighKnee ...
+                       - shankRotMat' * obj.shankKnee;
+            footPos = shankPos + shankRotMat' * obj.shankAnkle ...
+                       - footRotMat' * obj.footAnkle;
             
             % Assembling q
-            q = [thighPos; rotm2quat(rotMatThigh);
-                 shankPos; rotm2quat(rotMatShank);
-                 footPos; rotm2quat(rotMatFoot)];
+            q = [thighPos; rotm2quat(thighRotMat);
+                 shankPos; rotm2quat(shankRotMat);
+                 footPos; rotm2quat(footRotMat)];
         end
 
         function l = getMuscleLength(obj)
-            % TODO implement
+            % Extracting relevant coordinates
+            thighPos = obj.innerState(1:3);
+            thighAngles = obj.innerState(4:6);
+            kneeFlex = obj.innerState(7);
+            
+            % Determining state of thigh and shank
+            rotMatThigh = eul2rotm(thighAngles, "XYZ");
+            rotMatShank = eul2rotm([0 0 kneeFlex], "XYZ") * rotMatThigh;
+            shankPos = thighPos + thighRotMat' * obj.thighKnee ...
+                       - shankRotMat' * obj.shankKnee;
+
+            % Computing positions of origin, insertion in global ref.
+            originPos = thighPos + thighRotMat' * obj.origin;
+            insertionPos = shankPos + thighRotMat' * obj.insertion;
+
+            l = norm(insertionPos - originPos);
         end
 
         function q = getAbsoluteRotationRepresentation(obj)
