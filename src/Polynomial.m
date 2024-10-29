@@ -15,6 +15,7 @@ classdef Polynomial
                 msg = "The cardinality of A, %d, exceeds the maximum allowed size";
                 error(msg, cardinality);
             end
+            obj.a = zeros(cardinality, 1);
             obj.A = zeros(cardinality, Nq);
             row = 1;
             for p = 0:P
@@ -29,8 +30,13 @@ classdef Polynomial
         % Q is a matrix where every row is a pose representation q
         % l is a column vector with the muscle lenghts corresponding to the
         % states in Q.
-        function fit(obj, Q, l)
-            % TODO implement
+        function obj = fit(obj, Q, l)
+            Nm = size(Q, 1);
+            T = zeros(Nm, obj.Nq);
+            for row = 1:Nm
+                T(row, :) = obj.computePolynomialTerms(Q(row, :));
+            end
+            obj.a = l \ T;
         end
         
         % Computes the polynomial terms (without coefficients) from a pose
