@@ -87,9 +87,9 @@ classdef Leg < handle
                        - footRotMat' * obj.footAnkle;
             
             % Assembling q
-            q = [[thighPos; rotm2quat(thighRotMat)]...
-                 [shankPos; rotm2quat(shankRotMat)]...
-                 [footPos; rotm2quat(footRotMat)]];
+            q = [[thighPos; rotm2quat(thighRotMat)']...
+                 [shankPos; rotm2quat(shankRotMat)']...
+                 [footPos; rotm2quat(footRotMat)']];
             if nargin == 2 && flatten
                 q = q(:);
             end
@@ -117,7 +117,7 @@ classdef Leg < handle
         function q = getAbsoluteRotationRepresentation(obj, flatten)
             % This should clearly be cached, too much ATM
             fullCartesian = obj.getFullCartesianRepresentation();
-            q = fullCartesian(4:6, :);
+            q = fullCartesian(4:7, :);
             if nargin == 2 && flatten
                 q = q(:);
             end
