@@ -1,10 +1,15 @@
-function A = computeA(N, P)
+function A = computeA(N, P, justSize)
 %COMPUTEA Computes the set of all N-tuples of nonzero integers of sum L
-
+%   If justSize evaluates to true, the function just returns the size
+%   (cardinality) of A
     % First we solve the equivalent bars-and-stars (BS) problem
     nBS = P + N - 1;
     kBS = N - 1;
     cardinality = nchoosek(nBS, kBS);
+    if nargin == 3 && justSize
+        A = cardinality;
+        return
+    end
     barPosCombinations = nchoosek(1:nBS, kBS);
 
     % We translate the bars and stars solution to our original formulation

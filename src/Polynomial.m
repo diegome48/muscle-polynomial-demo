@@ -18,7 +18,7 @@ classdef Polynomial
             obj.A = zeros(cardinality, Nq);
             row = 1;
             for p = 0:P
-                blockSize = getSingleACardinality(Nq, p);
+                blockSize = computeA(Nq, p, true);
                 obj.A(row:row+blockSize-1, :) = computeA(Nq, p);
                 row = row + blockSize;
             end
@@ -41,16 +41,10 @@ classdef Polynomial
     end
 end
 
-function cardinality = getSingleACardinality(N, p)
-    k = N - 1;
-    n = p + N - 1;
-    cardinality = nchoosek(n, k);
-end
-
 function cardinality = getCompleteACardinality(N, P)
     cardinality = 0;
     for p = 0:P
-        cardinality = cardinality + getSingleACardinality(N, p);
+        cardinality = cardinality + computeA(N, p, true);
     end
 end
 
