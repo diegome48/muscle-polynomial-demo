@@ -144,6 +144,10 @@ classdef Leg
                 q = q(:);
             end
         end
+
+        function obj = setKneeFlexion(obj, kneeFlexionAngle)
+            obj.innerState(7) = kneeFlexionAngle;
+        end
     end
 end
 
