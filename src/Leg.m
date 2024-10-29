@@ -15,16 +15,22 @@ classdef Leg
     properties
         % Inner state representation (minimal set of coordinates)
         % A 8-vector containing, in this order,
-        %   - 3-vector of translational coordinates of the thigh
+        %   - 3-vector of translational coordinates xyz of the thigh
         %   - 3-vector of euler angles of the thigh in xyz formulation
         %   - scalar with knee flexion angle in radians
         %   - scalar with ankle dorsi-flexion angle in radians
+        % When the thigh is in its default orientation (all euler angles 0)
+        % and its local xyz axis are parallel to the global reference frame
+        % the axis have the following (roughly) anatomical meaning
+        %   x <---> anterior (+) posterior (-)
+        %   y <---> proximal/up (+) distal/down (-)
+        %   z <---> lateral (+) medial (-)
         innerState
         % Lower / Upper bounds for innerState
         % 8-vector in the same order as innerState.
         lb = [-1, -1, -1, 0, 0, 0, 0, 0];
         ub = [1, 1, 1, 2*pi, 2*pi, 2*pi, 3*pi/4, 3*pi/4];
-        % TODO define joint locations / geometry
+        % Local coordinates oint locations / geometry
         % TODO define origin and insertion points for the muscle
     end
     
