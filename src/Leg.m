@@ -48,7 +48,7 @@ classdef Leg < handle
 
         % Available representations
         representations = ["fullCartesian", "absoluteRotation", ...
-            "relativeRotation", "translation"];
+            "relativeRotation", "translation", "inner", "kneeFlexion"];
 
     end
     
@@ -106,7 +106,7 @@ classdef Leg < handle
             kneeFlex = obj.innerState(7);
             
             % Determining state of thigh and shank
-            thighRotMat = eul2rotm(thighAngles, "XYZ");
+            thighRotMat = eul2rotm(thighAngles', "XYZ");
             shankRotMat = eul2rotm([0 0 kneeFlex], "XYZ") * thighRotMat;
             shankPos = thighPos + thighRotMat' * obj.thighKnee ...
                        - shankRotMat' * obj.shankKnee;
@@ -160,6 +160,10 @@ classdef Leg < handle
                     rep = obj.getRelativeRotationRepresentation(flatten);
                 case "translation"
                     rep = obj.getTranslationRepresentation(flatten);
+                case "inner"
+                    rep = obj.innerState;
+                case "kneeFlexion"
+                    rep = obj.innerState(7);
             end
         end
 
