@@ -6,9 +6,9 @@ function A = computeA(N, P, justSize)
     % Trivial case where there is only one variable, A is a column variable
     % with integers from 0 to P.
     if N == 1
-        A = (0:P);
+        A = P;
         if nargin == 3 && justSize
-            A = length(A);
+            A = 1;
         end
         return
     end
