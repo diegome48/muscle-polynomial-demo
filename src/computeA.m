@@ -2,6 +2,18 @@ function A = computeA(N, P, justSize)
 %COMPUTEA Computes the set of all N-tuples of nonzero integers of sum L
 %   If justSize evaluates to true, the function just returns the size
 %   (cardinality) of A
+    
+    % Trivial case where there is only one variable, A is a column variable
+    % with integers from 0 to P.
+    if N == 1
+        A = (0:P);
+        if nargin == 3 && justSize
+            A = length(A);
+        end
+        return
+    end
+    
+
     % First we solve the equivalent bars-and-stars (BS) problem
     nBS = P + N - 1;
     kBS = N - 1;
