@@ -16,7 +16,7 @@ classdef Leg < handle
         % Inner state representation (minimal set of coordinates)
         % A 8-vector containing, in this order,
         %   - 3-vector of translational coordinates xyz of the thigh
-        %   - 3-vector of euler angles of the thigh in xyz formulation
+        %   - 3-vector of euler angles of the thigh in zyx formulation
         %   - scalar with knee flexion angle in radians
         %   - scalar with ankle dorsi-flexion angle in radians
         % When the thigh is in its default orientation (all euler angles 0)
@@ -80,9 +80,9 @@ classdef Leg < handle
             ankleFlex = obj.innerState(8);
 
             % Computing rotation matrices for each body
-            thighRotMat = eul2rotm(thighAngles', "XYZ");
-            shankRotMat = eul2rotm([0 0 kneeFlex], "XYZ") * thighRotMat;
-            footRotMat = eul2rotm([0 0 ankleFlex], "XYZ") * shankRotMat;
+            thighRotMat = eul2rotm(thighAngles');
+            shankRotMat = eul2rotm([kneeFlex, 0, 0]) * thighRotMat;
+            footRotMat = eul2rotm([-ankleFlex, 0, 0]) * shankRotMat;
 
             % Computing the translational coordinates of the shank and foot
             shankPos = thighPos + thighRotMat' * obj.thighKnee ...
@@ -106,8 +106,8 @@ classdef Leg < handle
             kneeFlex = obj.innerState(7);
             
             % Determining state of thigh and shank
-            thighRotMat = eul2rotm(thighAngles', "XYZ");
-            shankRotMat = eul2rotm([0 0 kneeFlex], "XYZ") * thighRotMat;
+            thighRotMat = eul2rotm(thighAngles');
+            shankRotMat = eul2rotm([kneeFlex 0 0]) * thighRotMat;
             shankPos = thighPos + thighRotMat' * obj.thighKnee ...
                        - shankRotMat' * obj.shankKnee;
 
@@ -149,6 +149,28 @@ classdef Leg < handle
             end
         end
 
+        function j = getJointLocations(obj, flatten)
+            % Computes the translational coordinates of the joint centers
+            % Joint locations are computed twice, once with respect to each
+            % involved segment.
+            % Originally meant for debugging and Leg's plot method
+            q = obj.getFullCartesianRepresentation(false);
+            rThigh = q(1:3, 1);
+            rShank = q(1:3, 2);
+            rFoot = q(1:3, 3);
+            thighRotMat = quat2rotm(q(4:7, 1)');
+            shankRotMat = quat2rotm(q(4:7, 2)');
+            footRotMat = quat2rotm(q(4:7, 3)');
+
+            j = [rThigh + thighRotMat' * obj.thighKnee ...
+                 rShank + shankRotMat' * obj.shankKnee ...
+                 rShank + shankRotMat' * obj.shankAnkle ...
+                 rFoot + footRotMat' * obj.footAnkle];
+            if nargin == 2 && flatten
+                j = j(:);
+            end
+        end
+
         function rep = getRepresentation(obj, representation, flatten)
             % Gets any of the representations by its name
             switch representation
@@ -172,15 +194,25 @@ classdef Leg < handle
         end
 
         function plot(obj)
-            q = obj.getTranslationRepresentation(false);
-            x = q(1,:)';
-            y = q(2,:)';
-            z = q(3,:)';
+            % Display the Leg's current state in 3d
+            q = obj.getFullCartesianRepresentation(false);
+            joints = obj.getJointLocations(false);
+            chain = [q(1:3, 1)...
+                     joints(:, 1)...
+                     joints(:, 2)...
+                     q(1:3, 2)...
+                     joints(:, 3)...
+                     joints(:, 4)...
+                     q(1:3, 3)];
+
             figure();
             title("Leg pose")
-            plot3(x, y, z)
+            plot3(chain(1,:), -chain(3,:), chain(2,:), LineWidth=5.0)
             hold on
-            scatter3(x, y, z)
+            scatter3(joints(1,:), -joints(3,:), joints(2,:), 100, "filled")
+            xlabel("X")
+            ylabel("Z")
+            zlabel("Y")
         end
     end
 end
