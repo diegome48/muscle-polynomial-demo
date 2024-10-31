@@ -37,7 +37,8 @@ classdef Polynomial < handle
             for row = 1:Nm
                 T(row, :) = obj.computePolynomialTerms(Q(row, :));
             end
-            obj.a = T\l;
+            % obj.a = T\l;
+            obj.a = lsqminnorm(T, l);
         end
         
         % Computes the polynomial terms (without coefficients) from a pose
@@ -53,6 +54,10 @@ classdef Polynomial < handle
         % Evaluate a set states Q.
         % Q must be a matrix where each row represents a state
         function outputs = evaluate(obj, Q)
+            % If a column vector is provided, we flip it
+            if size(Q, 2) == 1
+                Q = Q';
+            end
             Nm = size(Q, 1);
             outputs = zeros(Nm, 1);
             for row = 1:Nm
