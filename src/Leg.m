@@ -170,6 +170,18 @@ classdef Leg < handle
         function setKneeFlexion(obj, kneeFlexionAngle)
             obj.innerState(7) = kneeFlexionAngle;
         end
+
+        function plot(obj)
+            q = obj.getTranslationRepresentation(false);
+            x = q(1,:)';
+            y = q(2,:)';
+            z = q(3,:)';
+            figure();
+            title("Leg pose")
+            plot3(x, y, z)
+            hold on
+            scatter3(x, y, z)
+        end
     end
 end
 
