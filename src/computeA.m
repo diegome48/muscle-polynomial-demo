@@ -3,8 +3,8 @@ function A = computeA(N, P, justSize)
 %   If justSize evaluates to true, the function just returns the size
 %   (cardinality) of A
     
-    % Trivial case where there is only one variable, A is a column variable
-    % with integers from 0 to P.
+    % Trivial case where there is only one variable, A has a single element
+    % with value P
     if N == 1
         A = P;
         if nargin == 3 && justSize
