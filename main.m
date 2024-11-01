@@ -2,7 +2,7 @@ clc
 clear variables
 addpath src
 % Degree of the considered polynomials
-P = 3;
+P = 2;
 
 %% Definition of system and polynomial models
 % System
@@ -128,7 +128,7 @@ plot(flexInDeg, muscleLengths, LineWidth=3.0, Color="k")
 hold on
 for i = 1:length(modelTags)
    tag = modelTags(i);
-   sep = 1e-4 * i;
+   sep = 1e-3 * i;
    plot(flexInDeg, predictions.(tag) + sep, LineWidth=2.0);
 end
 legend(["Geometric model", modelTags]);
