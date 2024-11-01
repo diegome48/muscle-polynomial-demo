@@ -2,7 +2,7 @@ clc
 clear variables
 addpath src
 % Degree of the considered polynomials
-P = 2;
+P = 3;
 
 %% Definition of system and polynomial models
 % System
@@ -19,19 +19,19 @@ end
 %% Sampling body states - muscle length pairs
 % Number of samples is 5 times (arbitrary) the number of coefficients in 
 % the biggest polynomial (the full cartesian)
-Nm = 5 * models.fullCartesian.Na;
+NSamples = 5 * models.fullCartesian.Na;
 % Defining structures to store data from samples
 samples = struct();
 for i = 1:length(modelTags)
    tag = modelTags(i);
    Nq = models.(tag).Nq;
-   samples.(tag) = zeros(Nm, Nq);
+   samples.(tag) = zeros(NSamples, Nq);
 end
-muscleLengths = zeros(Nm, 1);
+muscleLengths = zeros(NSamples, 1);
 
 
-% Sampling Nm times
-for m = 1:Nm
+% Sampling NSamples times
+for m = 1:NSamples
     body.sample();
     muscleLengths(m) = body.getMuscleLength();
     for i = 1:length(modelTags)
@@ -48,7 +48,7 @@ end
 
 %% Creating a trajectory to test the models
 % Defining knee flexions to evaluate the model in
-Nm = 1000;
+Nm = 100;
 kneeFlexions = linspace(0, 0.95*pi, Nm);
 muscleLengths = zeros(length(kneeFlexions), 1);
 
@@ -82,22 +82,23 @@ for i = 1:length(modelTags)
    plot(flexInDeg, predictions.(tag), LineWidth=2.0);
 end
 legend(["Geometric model", modelTags]);
-title("Muscle predictions");
+title("Fitting from a training set");
 xlabel("Knee flexion (deg)");
 ylabel("Muscle length (m)");
 
 
 
-%% Checking for errors by fitting directly to predicted vals.
-% Sampling from the trajectory only
+%% Checking for errors by fitting directly to values to be predicted
+% Allocating space for the samples
 for i = 1:length(modelTags)
    tag = modelTags(i);
    Nq = models.(tag).Nq;
    samples.(tag) = zeros(Nm, Nq);
 end
 
+% Sampling across different knee flexions
 for m = 1:Nm
-    body.setKneeFlexion(kneeFlexions(i));
+    body.setKneeFlexion(kneeFlexions(m));
     for i = 1:length(modelTags)
        tag = modelTags(i);
        samples.(tag)(m,:) = body.getRepresentation(tag, true);
@@ -122,7 +123,7 @@ for t = 1:length(modelTags)
 end
 
 % Plotting
-hold off
+figure()
 plot(flexInDeg, muscleLengths, LineWidth=3.0, Color="k")
 hold on
 for i = 1:length(modelTags)
@@ -131,13 +132,6 @@ for i = 1:length(modelTags)
    plot(flexInDeg, predictions.(tag) + sep, LineWidth=2.0);
 end
 legend(["Geometric model", modelTags]);
-title("Muscle predictions");
+title("Fitting the evaluated set");
 xlabel("Knee flexion (deg)");
 ylabel("Muscle length (m)");
-
-%% Displaying polynomial coefficients
-% for i = 1:length(modelTags)
-%     tag = modelTags(i)
-%     a = models.(tag).a
-% end
-% hold off
