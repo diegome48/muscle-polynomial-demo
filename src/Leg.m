@@ -48,7 +48,8 @@ classdef Leg < handle
 
         % Available representations
         representations = ["fullCartesian", "absoluteRotation", ...
-            "relativeRotation", "translation", "inner", "kneeFlexion"];
+            "relativeRotation", "absoluteTranslation", ...
+            "relativeTranslation", "inner", "kneeFlexion"];
 
     end
     
@@ -141,9 +142,22 @@ classdef Leg < handle
             end
         end
 
-        function q = getTranslationRepresentation(obj, flatten)
+        function q = getAbsoluteTranslationRepresentation(obj, flatten)
             fullCartesian = obj.getFullCartesianRepresentation();
             q = fullCartesian(1:3, :);
+            if nargin == 2 && flatten
+                q = q(:);
+            end
+        end
+
+        function q = getRelativeTranslationRepresentation(obj, flatten)
+            absoluteTrans = obj.getAbsoluteTranslationRepresentation();
+            ref = absoluteTrans(:,1);
+            colCount = size(absoluteTrans, 2)-1;
+            q = zeros(3, colCount);
+            for col = 1:colCount
+                q(:, col) = absoluteTrans(:, col+1) - ref;
+            end
             if nargin == 2 && flatten
                 q = q(:);
             end
@@ -180,8 +194,10 @@ classdef Leg < handle
                     rep = obj.getAbsoluteRotationRepresentation(flatten);
                 case "relativeRotation"
                     rep = obj.getRelativeRotationRepresentation(flatten);
-                case "translation"
-                    rep = obj.getTranslationRepresentation(flatten);
+                case "absoluteTranslation"
+                    rep = obj.getAbsoluteTranslationRepresentation(flatten);
+                case "relativeTranslation"
+                    rep = obj.getRelativeTranslationRepresentation(flatten);
                 case "inner"
                     rep = obj.innerState;
                 case "kneeFlexion"
