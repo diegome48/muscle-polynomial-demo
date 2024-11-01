@@ -44,7 +44,7 @@ classdef Leg < handle
         % Origin and insertion of "hamstring" in the thigh and shank
         % respectively, both in local coordinates
         origin = [0; 0.20; -0.05];
-        insertion = [-0.05; 0.18; 0]
+        insertion = [-0.05; 0.18; 0];
 
         % Available representations
         representations = ["fullCartesian", "absoluteRotation", ...
@@ -55,7 +55,7 @@ classdef Leg < handle
     
     methods
         function obj = Leg()
-            obj.sample();
+            obj.innerState = [0 1 0 0 0 0 pi/4 pi/2]';
         end
         
         function sample(obj)
@@ -185,6 +185,24 @@ classdef Leg < handle
             end
         end
 
+        function muscle = getOriginInsertion(obj)
+            % Computes the translational coordinates of the origin and
+            % insertion point of the muscle in the global reference frame.
+
+            % Extracting state information
+            q = obj.getFullCartesianRepresentation(false);
+            rThigh = q(1:3, 1);
+            rShank = q(1:3, 2);
+            thighRotMat = quat2rotm(q(4:7, 1)');
+            shankRotMat = quat2rotm(q(4:7, 2)');
+
+            % Computing origin and insertion points
+            originGlobal = rThigh + thighRotMat' * obj.origin;
+            insertionGlobal = rShank + shankRotMat' * obj.insertion;
+
+            muscle = [originGlobal insertionGlobal];
+        end
+
         function rep = getRepresentation(obj, representation, flatten)
             % Gets any of the representations by its name
             switch representation
@@ -220,12 +238,15 @@ classdef Leg < handle
                      joints(:, 3)...
                      joints(:, 4)...
                      q(1:3, 3)];
-
+            muscles = obj.getOriginInsertion();
             figure();
             title("Leg pose")
             plot3(chain(1,:), -chain(3,:), chain(2,:), LineWidth=5.0)
             hold on
+            plot3(muscles(1,:), -muscles(3,:), muscles(2,:), ...
+                LineWidth=4.0, Color="red")
             scatter3(joints(1,:), -joints(3,:), joints(2,:), 100, "filled")
+            axis equal
             xlabel("X")
             ylabel("Z")
             zlabel("Y")
