@@ -37,6 +37,9 @@ classdef Polynomial < handle
             for row = 1:Nm
                 T(row, :) = obj.computePolynomialTerms(Q(row, :));
             end
+            % Cannot solve by pseudoinverse. Even though T has more rows
+            % than columns, it is rank deficient, so the problem is
+            % actually underdeterminate
             % obj.a = T\l;
             obj.a = lsqminnorm(T, l);
         end
