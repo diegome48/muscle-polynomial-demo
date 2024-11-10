@@ -92,9 +92,9 @@ classdef Leg < handle
                        - footRotMat' * obj.footAnkle;
             
             % Assembling q
-            q = [[thighPos; rotm2quat(thighRotMat)']...
-                 [shankPos; rotm2quat(shankRotMat)']...
-                 [footPos; rotm2quat(footRotMat)']];
+            q = [[thighPos; quaternionFromRotMat(thighRotMat)']...
+                 [shankPos; quaternionFromRotMat(shankRotMat)']...
+                 [footPos; quaternionFromRotMat(footRotMat)']];
             if nargin == 2 && flatten
                 q = q(:);
             end
@@ -264,6 +264,13 @@ function locked = isItGimballing(sample)
     EPSILON = pi / 36;
     beta = sample(5);
     locked = abs(abs(beta) - pi) < EPSILON;
+end
+
+function p = quaternionFromRotMat(A)
+    p = rotm2quat(A);
+    if p(0) < 0
+        p = -p;
+    end
 end
 
 function pij = quaternionRelativeRotation(pi, pj)
