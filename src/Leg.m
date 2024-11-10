@@ -268,7 +268,7 @@ end
 
 function p = quaternionFromRotMat(A)
     p = rotm2quat(A);
-    if p(0) < 0
+    if p(1) < 0
         p = -p;
     end
 end
